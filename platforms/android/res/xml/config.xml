@@ -3,7 +3,7 @@
     <preference name="loglevel" value="DEBUG" />
     <preference name="AndroidLaunchMode" value="singleTop" />
     <feature name="App">
-        <param name="android-package" value="org.apache.cordova.App" />
+        <param name="android-package" value="org.apache.cordova.Storage"  /><!-- Erik 09.08.2014 23:50 | Para banco de dados local  !--> 
     </feature>
     <name>HelloCordova</name>
     <description>
