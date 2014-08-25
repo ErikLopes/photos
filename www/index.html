@@ -36,6 +36,16 @@
             var keyImage; 
             var positionArrayImages = 0; // - variável global para identificar a posição atual do array images
             
+            // - apenas para teste
+            $(window).load(function(){
+                
+                 //var url = 'Photos.php?acao=next';
+            //     getImageDataBase(0, url, 0, 1);
+                
+              //  return false;
+                
+            });
+            
             /*
              * A posição inicial do array images será alimentada por uma imagem fixa e local
              */
@@ -166,13 +176,13 @@
                 
                 
                 $.post(url, data, function(retorno){
-                    var obj =JSON.parse(retorno);
-                  
+                    var obj = JSON.parse(retorno);
+                
                     for (var i = 0; i < obj.length; i++){
                         // - É adicionado as novas imagens no array global imagens
                         images.push(obj[i]);
                     }
-                    
+                 
                     if(changeImage){
                         event.target.src = images[positionArrayImages]; // - Troca a imagem
                     }

@@ -1,8 +1,10 @@
 <?php
 
+define('CACHED_DIRECTORY',  __DIR__.'\images2'); # Diretorio onde serão armazenados as imagens
+define('QT_IMAGE', 3); # Armazena a quantidade de imagens que sera retornada através de um array..default 10
 
-require("Cache.php");
 
+include("Cache.php");
 
 
     $data['acao']            = filter_input(INPUT_GET, 'acao', FILTER_SANITIZE_STRING);
@@ -12,35 +14,30 @@ require("Cache.php");
     switch($data['acao']){
         case 'next':
             $photos = new Photos($data);
-            echo $photos->gerenciaFotos();
+            echo $photos->managePhotos();
             break;
     }
      
    
 class Photos{
     
-    
-    private $dados; // - Array com os dados passado pelo usuário
-    private static $directory = 'images1';  // - Diretorio de onde as imagens cacheadas ficaram
+    private $data; // - Array com os dados passado pelo usuário
     private $options; // - A principaio não será usada será a opcao de tamanho de imagem por exemplo
+    private $return;// - Retorna array para o usuario;
+    private $last_id_image;
     
-        /**
+    /**
      *
-     * @var ImageCache 
+     * @type Cache
      */
-    private $imageCache;  // - Objeto da classe ImageCache
+    public $Cache;  // - Objeto da classe Cache
     
     
     function __construct(array $data) {
-        $this->dados = $this->validatesArray($data);
+       
+        $this->data = $this->validatesArray($data);
         
-        $options = array('directory_name' => 'images');
-        
-        // - Flag para identificar se será necessário criar o diretorio de imagens
-        $flag = false;
-        if(!file_exists('images1'))
-            $flag = false;
-        
+         $this->Cache = new Cache();
     }
     
     /**
@@ -51,18 +48,45 @@ class Photos{
     private function validatesArray(array $array){
         
         /**** CRIAR *****/
-        
+        $array['last_id_image'] = 0;
+        $this->last_id_image = 0;
         
         return $array;
     }
     
+    public function managePhotos(){
+        
+         $last_id_image = $this->data['last_id_image'];
+         $id_category = $this->data['id_category'];
+        
+        
+        // $last_id_imagem++; // - Busca a proxima chave da imagem
+        for($i = 0; $i <= QT_IMAGE; $i++){
+        
+            if($this->Cache->searchCacheFile($last_id_image)){ // - Se existe o arquivo
+                $dataImage[$i] = $this->Cache->getContentFile($last_id_image); // - Pega imagem do repositorio
+            }else{
+                break;
+            }
+
+            $last_id_image++;
+        }
+        
+        # A principio deixei 2 para testes mas futuramento deverá ser igual a 10
+        if(sizeof($dataImage) > 2){
+           echo json_encode($dataImage);  // - retorno para o javaScript
+           exit(1); // - Sai de tudo
+        }
+        
+        # Se já ainda não foi retornado para o usuario, significa que devera ser buscado mais imagens do bd
+        $this->getImageBD($last_id_image, $id_category);
+        
+    }
     
-    public function gerenciaFotos(){
-        
-        
-        
-        
-        
+    /*
+     * Função resposavel por buscar os links de  imagens no banco de dados
+     */
+    protected function getImageBD($last_id_image, $id_category){
         
         $files = array(); // - Aqui será substituido por uma consulta ao banco de dados..
         $files[0]  = "http://wallpaper.ultradownloads.com.br/173672_Papel-de-Parede-Imagem-da-Mae-Terra_1400x1050.jpg";
@@ -71,19 +95,15 @@ class Photos{
         $files[3] = "http://2.bp.blogspot.com/-61xH3wklpQc/UV-iWymKFFI/AAAAAAAAOBs/h6A30i8hIoM/s1600/carro-novo-fiat-Palio-Fire-Economy-2014+(2).jpg";
         
         
-        foreach($files as  $file){
-          
-            $dataImage[] = 'data: image/jpeg;base64,'. base64_encode(file_get_contents($file));
+        foreach($files as  $key => $file){
+            $dataImage[$key] = 'data: image/jpeg;base64,'. base64_encode(file_get_contents($file));
             
-            // - Cria o cache da imagem
-                    //  error_log($dataImage[$key]);
-        }
+            $this->Cache->setFile($key); # O nome do arquivo será o id do table Images no BD
+            $this->Cache->createCacheFile($dataImage[$key]); // - Cria e salva o conteudo do arquivo 
+        }   
         
-        echo json_encode($dataImage);  // - Retorno para o javaScript
-    }
-    
-    protected function directoryExists(){
-        
+        echo json_encode($dataImage);  # Retorno para o javaScript
+        return;
     }
     
 }
