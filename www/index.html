@@ -26,138 +26,125 @@
         <link rel="stylesheet" href="css/jquery.mobile-1.4.2.min.css">
         <script src="js/jquery-1.10.2.min.js"></script>
         <script src="js/jquery.mobile-1.4.2.min.js"></script>
-        
-      <!--  <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.3.min.css"/> !-->
-        
-       <!--  <meta name="msapplication-tap-highlight" content="no" /> !-->
+        <script src="js/functions.js"></script>
+
+        <!--  <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.3.min.css"/> !-->
+
+        <!--  <meta name="msapplication-tap-highlight" content="no" /> !-->
         <title>Hello World</title>
         <script type="text/javascript" charset="utf-8">
             var images = []; // - Array global que armazenará as imagens
-            var keyImage; 
+            var keyImage;
             var positionArrayImages = 0; // - variável global para identificar a posição atual do array images
-            
+
             // - apenas para teste
-            $(window).load(function(){
-                
-                 //var url = 'Photos.php?acao=next';
-            //     getImageDataBase(0, url, 0, 1);
-                
-              //  return false;
-                
+            $(window).ready(function() {
+                //db = window.openDataBase("teste", "1.0.0", "Teste", 100000000);
+                manageDataBase(window);
+                //createDataBase();
+                //var url = 'Photos.php?acao=next';
+                //getImageDataBase(0, url, 0, 1);
+                // return false;
+
+
+
+
             });
-            
+
             /*
              * A posição inicial do array images será alimentada por uma imagem fixa e local
              */
             images[0] = 'images/logo.png';
-            
-            
-/*            // -  Banco de dados Mysqli 
-            document.addEventListener("deviceready", onDeviceReady, false);
-            
-            function onDeviceReady() {
-                 db = window.openDatabase("photos", "1.0", "bd Photos", 1000000);
-            }
-   
-            function populateDB(tx) {
-                 tx.executeSql('DROP TABLE IF EXISTS Config');
-                 tx.executeSql('CREATE TABLE IF NOT EXISTS Config (id unique, data )');
-                 tx.executeSql('INSERT INTO Config (id, data) VALUES (1, "First row")');
-                 tx.executeSql('INSERT INTO Config (id, data) VALUES (2, "Second row")');
-             }
 
-             function errorCB(err) {
-                 alert("Error processing SQL: "+err.code);
-             }
 
-            function successCB() {
-                 alert("success!");
-            }
+            // -  Banco de dados Mysqli 
+            //   document.addEventListener("deviceready", onDeviceReady, false);
 
-            var db = window.openDatabase("Database", "1.0", "Cordova Demo",200000);
-            db = window.openDatabase("photos", "1.0", "bd Photos", 100000);
-            db.transaction(populateDB, errorCB, successCB);
-           
-*/
-           
-            $( document ).on( "pageinit", function() {
-                $( ".photopopup" ).on({
+
+            //var db = window.openDatabase("Database", "1.0", "Cordova Demo",200000);
+            // db = window.openDatabase("photos", "1.0", "bd Photos", 100000);
+            //db.transaction(populateDB, errorCB, successCB);
+
+
+
+            $(document).on("pageinit", function() {
+                $(".photopopup").on({
                     popupbeforeposition: function() {
-                        var maxHeight = $( window ).height() - 60 + "px";
-                        $( ".photopopup img" ).css( "max-height", maxHeight );
+                        var maxHeight = $(window).height() - 60 + "px";
+                        $(".photopopup img").css("max-height", maxHeight);
                     }
                 });
             });
-            
-            $( window ).on( "swipeleft", function( event ) { 
-                 var data = (event.originalEvent && event.originalEvent.touches) ? event.originalEvent.touches[0] : event;
-                 // - Se o usuario esta na div de imagens e navegando para a esquerda
-                 if(data.target.parentElement.id == 'popupPhotoLandscape'){
-                     // - Chama função que será responsavel por buscar e trocar as imagens a proxima foto
-                     getNextPhoto(data);
-                 }
-            } );
-            
-            $( window ).on( "swiperight", function( event ) { 
-                 var data = (event.originalEvent && event.originalEvent.touches) ? event.originalEvent.touches[0] : event;
-                 // - Se o usuario esta na div de imagens e navegando para a esquerda
-                 if(data.target.parentElement.id == 'popupPhotoLandscape'){
-                     // - Chama função que será responsavel por buscar e trocar as imagens a  foto anterior
-                     getForePhoto(data);
-                 }
-            } );
-            
-            function getNextPhoto(event){
-                var url = 'Photos.php?acao=next';
+
+            $(window).on("swipeleft", function(event) {
+                var data = (event.originalEvent && event.originalEvent.touches) ? event.originalEvent.touches[0] : event;
+                // - Se o usuario esta na div de imagens e navegando para a esquerda
+                if (data.target.parentElement.id == 'popupPhotoLandscape') {
+                    // - Chama função que será responsavel por buscar e trocar as imagens a proxima foto
+                    getNextPhoto(data);
+                }
+            });
+
+            $(window).on("swiperight", function(event) {
+                var data = (event.originalEvent && event.originalEvent.touches) ? event.originalEvent.touches[0] : event;
+                // - Se o usuario esta na div de imagens e navegando para a esquerda
+                if (data.target.parentElement.id == 'popupPhotoLandscape') {
+                    // - Chama função que será responsavel por buscar e trocar as imagens a  foto anterior
+                    getForePhoto(data);
+                }
+            });
+
+            function getNextPhoto(event) {
+                var url = 'Photos.php?action=next';
                 var data = '';
-                
+
                 // - Troca a chave para a  proxima posição do array images
                 positionArrayImages = positionArrayImages + 1;
-                
-                
+
+
                 /*
                  * Controle para que não seja acessada uma posição sem os devidos dados(valor)
                  * Ex.. O tamanho do array imagens é 10 e a uma tentativa de acessar a posição 11.
-                 */ 
-                if(positionArrayImages > images.length){
+                 */
+                if (positionArrayImages > images.length) {
                     positionArrayImages = positionArrayImages - 1;
-                    event.target.src = images[positionArrayImages]; 
+                    event.target.src = images[positionArrayImages];
                     return false;
-                }    
-                
-                
+                }
+
+
                 /*
                  * - Controle para identificar se é necessario buscar mais fotos pelo banco de dados
                  * - A busca só será realizada quando estiver faltando duas fotos 
                  */
-                if((images.length - positionArrayImages) <= 2) {
-                   
-                    if((images.length - positionArrayImages) == 0  ){
+                if ((images.length - positionArrayImages) <= 2) {
+
+                    if ((images.length - positionArrayImages) == 0) {
                         getImageDataBase(event, url, data, 1); // - Busca e altera a foto
-                        
-                    }else{
-                          event.target.src = images[positionArrayImages]; // - Altera a foto
-                          getImageDataBase(event, url, data, 0); // - Busca mais fotos 
+
+                    } else {
+                        event.target.src = images[positionArrayImages]; // - Altera a foto
+                        getImageDataBase(event, url, data, 0); // - Busca mais fotos 
                     }
-               
-                }else{
+
+                } else {
                     event.target.src = images[positionArrayImages]; // - Apenas troca a posição da imagem
-                    
+
                 }
             }
-            
-            function getForePhoto(event){
-                var url = 'Photos.php?acao=fore';
+
+            function getForePhoto(event) {
+                var url = 'Photos.php?action=fore';
                 var data = '';
-                
+
                 positionArrayImages = positionArrayImages - 1;
-                 
-                if(positionArrayImages < 0)
+
+                if (positionArrayImages < 0)
                     positionArrayImages = 0;
-               
-                 event.target.src = images[positionArrayImages];
+
+                event.target.src = images[positionArrayImages];
             }
-                        
+
             /**
              *  // - Função responsável por chamar o php para trazer imagens do banco de dados
              *  
@@ -167,55 +154,67 @@
              * @param {type} changeImage // - Identifica se é necessário atualizar a imagem 
              * @returns {undefined}      // - Nada é retornado
              */
-            function getImageDataBase(event, url, data, changeImage){
+            function getImageDataBase(event, url, data, changeImage) {
                 console.log('fez consulta');
-                
-                // - CRIAR
-                // - Deve ser criado um controle para que se já foi realizado uma solicitação do servidor, o javascript não faça mais uma
-                // - ou seja, uma requisição por vez.
-                
-                
-                $.post(url, data, function(retorno){
-                    var obj = JSON.parse(retorno);
-                
-                    for (var i = 0; i < obj.length; i++){
-                        // - É adicionado as novas imagens no array global imagens
-                        images.push(obj[i]);
-                    }
-                 
-                    if(changeImage){
-                        event.target.src = images[positionArrayImages]; // - Troca a imagem
-                    }
-                });
+                try {
+                    // - CRIAR
+                    // - Deve ser criado um controle para que se já foi realizado uma solicitação do servidor, o javascript não faça mais uma
+                    // - ou seja, uma requisição por vez.
+
+                    // - CRIAR
+                    // - Deverá ser mostrado um gif de keep calm, enquanto é esperado o retorno do PHP
+
+                    $.post(url, data, function(retorno) {
+                        var obj = JSON.parse(retorno);
+
+                        for (var i = 0; i < obj.length; i++) {
+                            // - É adicionado as novas imagens no array global imagens
+                            images.push(obj[i]['data']);
+
+                            // - insere os dados no BD local
+                            (function(key, value) {
+                                db.transaction(function(tx) {
+                                    tx.executeSql("INSERT INTO images (id, data) VALUES(" + key + ",'" + value + "')");
+                                });
+                            })(obj[i]['key_image'], obj[i]['data']);
+                        }
+
+                        if (changeImage) {
+                            event.target.src = images[positionArrayImages]; // - Troca a imagem
+                        }
+                    });
+                } catch (e) {
+                    console.log(e);
+                }
             }
-            
-         </script>
+
+        </script>
     </head>
     <body>
         <div data-role="page" id="main">
-        
+
             <!-- painel  de configuração !--> 
             <div data-role="panel" id="mypanel">
                 Aqui será o painel de configuração<br/>
-               
-               <label for="flip-a">Proteger com senha:</label>
-               <select name="slider" id="flip-a" data-role="slider">
-                   <option value="off">Off</option>
-                   <option value="on">On</option>
-               </select>
-               <br/>
+
+                <label for="flip-a">Proteger com senha:</label>
+                <select name="slider" id="flip-a" data-role="slider">
+                    <option value="off">Off</option>
+                    <option value="on">On</option>
+                </select>
+                <br/>
                 <a href="#demo-links" data-rel="close" data-role="button" data-theme="a" data-icon="delete" data-inline="true" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" class="ui-btn ui-shadow ui-btn-corner-all ui-btn-inline ui-btn-icon-left ui-btn-hover-a ui-btn-up-a"><span class="ui-btn-inner"><span class="ui-btn-text">Close panel</span><span class="ui-icon ui-icon-delete ui-icon-shadow">&nbsp;</span></span></a>
             </div>
             <!-- fim painel  de configuração !--> 
-        
-            
-             <!-- div imagem !--> 
+
+
+            <!-- div imagem !--> 
             <div data-role="popup" id="popupPhotoLandscape" class="photopopup" data-overlay-theme="a" data-corners="false" data-tolerance="30,15">
                 <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
                 <img id="galeria_imagem" name="galeria_imagem" src="images/logo.png" >
             </div>
-             <!-- fim  div imagem !--> 
-        
+            <!-- fim  div imagem !--> 
+
 
             <!-- header !-->
             <div data-role="header">
@@ -223,9 +222,9 @@
             </div>
             <!-- fim header !-->
 
-             <!-- body !-->
+            <!-- body !-->
             <div id="content" data-role="content">
-                
+
                 <!-- navbar -->
                 <div data-role="navbar" data-iconpos="bottom">
                     <ul>
@@ -242,7 +241,7 @@
             </div>
             <!-- fim body !-->
 
-            
+
             <!-- footer !-->
             <!--
             <div data-role="footer">
